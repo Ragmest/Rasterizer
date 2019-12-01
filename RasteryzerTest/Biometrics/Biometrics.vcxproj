@@ -150,10 +150,14 @@
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Rasterizer.cpp" />
+    <ClCompile Include="VertexProcesor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="Rasterizer.h" />
     <ClInclude Include="Structures.h" />
+    <ClInclude Include="VertexProcesor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

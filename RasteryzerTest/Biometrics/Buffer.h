@@ -2,9 +2,8 @@
 #include "Structures.h"
 class Buffer
 {
-private:
-	int w, h;
 public:
+	int w, h;
 	int minx, miny, maxx, maxy;
 	float dx12, dx23, dx31, dy12, dy23, dy31;
 	bool tl1, tl2, tl3;
