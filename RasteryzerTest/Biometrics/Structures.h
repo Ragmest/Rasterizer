@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
-#define WIDTH 1024	
-#define HEIGHT 1024
-#define DEPTH 1024
+#define WIDTH 512	
+#define HEIGHT 512
+#define DEPTH 512
 #define PI 3.14159
 
 const float epsilon = 0.0001f;
@@ -97,6 +97,11 @@ struct float3
 		return float3(x * other, y * other, z * other);
 	}
 
+	float3 operator/(const float& other)
+	{
+		return float3(x / other, y / other, z / other);
+	}
+
 	friend std::ostream & operator << (std::ostream &out, const float3 &a)
 	{
 		out << a.x << " " << a.y << " " << a.z << std::endl;
@@ -109,6 +114,7 @@ struct float4
 	float x, y, z, w;
 	float4() : x(0), y(0), z(0), w(1) {}
 	float4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+	float4(float x, float y, float z) : x(x), y(y), z(z), w(1) {}
 
 	float dot(const float4& other)
 	{
@@ -200,18 +206,21 @@ struct float4x4
 
 	float4 operator*(const float4& other)
 	{
-		return float4(	mat[0].x * other.x + mat[0].y * other.y + mat[0].z * other.z + mat[0].w * other.w,
-						mat[1].x * other.x + mat[1].y * other.y + mat[1].z * other.z + mat[1].w * other.w,
-						mat[2].x * other.x + mat[2].y * other.y + mat[2].z * other.z + mat[2].w * other.w,
-						mat[3].x * other.x + mat[3].y * other.y + mat[3].z * other.z + mat[3].w * other.w);
+		return float4(mat[0].x * other.x + mat[0].y * other.y + mat[0].z * other.z + mat[0].w * other.w,
+			mat[1].x * other.x + mat[1].y * other.y + mat[1].z * other.z + mat[1].w * other.w,
+			mat[2].x * other.x + mat[2].y * other.y + mat[2].z * other.z + mat[2].w * other.w,
+			mat[3].x * other.x + mat[3].y * other.y + mat[3].z * other.z + mat[3].w * other.w);
 	}
 
 	float4 operator*(const float3& other)
 	{
-		return float4(	mat[0].x * other.x + mat[0].y * other.y + mat[0].z * other.z + mat[0].w,
-						mat[1].x * other.x + mat[1].y * other.y + mat[1].z * other.z + mat[1].w,
-						mat[2].x * other.x + mat[2].y * other.y + mat[2].z * other.z + mat[2].w,
-						mat[3].x * other.x + mat[3].y * other.y + mat[3].z * other.z + mat[3].w);
+		return float4(mat[0].x * other.x + mat[0].y * other.y + mat[0].z * other.z + mat[0].w,
+			mat[1].x * other.x + mat[1].y * other.y + mat[1].z * other.z + mat[1].w,
+			mat[2].x * other.x + mat[2].y * other.y + mat[2].z * other.z + mat[2].w,
+			mat[3].x * other.x + mat[3].y * other.y + mat[3].z * other.z + mat[3].w);
+		//return float3(mat[0].x * other.x + mat[1].x * other.y + mat[2].x * other.z + mat[3].x,
+		//	mat[0].y * other.x + mat[1].y * other.y + mat[2].y * other.z + mat[3].y,
+		//	mat[0].z * other.x + mat[1].z * other.y + mat[2].z * other.z + mat[3].z);
 	}
 
 	float4& operator[](int i) { return mat[i]; }

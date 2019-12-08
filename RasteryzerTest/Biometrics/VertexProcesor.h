@@ -11,6 +11,7 @@ public:
 	void multByTranslation(float3& v);
 	void multByScale(float3& v);
 	void multByRotation(float& a, float3& v);
+	void clear();
 	VertexProcesor();
 	~VertexProcesor();
 };

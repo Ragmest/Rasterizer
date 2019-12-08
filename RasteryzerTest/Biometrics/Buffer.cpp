@@ -43,7 +43,7 @@ void Buffer::clearDepth()
 			depth[i][j] = DEPTH;
 }
 
-void Buffer::setBordersAndCons(float3* ver1, float3* ver2, float3* ver3)
+void Buffer::setBordersAndCons(float4* ver1, float4* ver2, float4* ver3)
 {
 	minx = std::min(std::min(ver1->x, ver2->x), ver3->x);
 	miny = std::min(std::min(ver1->y, ver2->y), ver3->y);

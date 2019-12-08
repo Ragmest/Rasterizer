@@ -14,7 +14,7 @@ public:
 	void clearColor(unsigned char c);
 	void clearColor(unsigned char r, unsigned char g, unsigned char b);
 	void clearDepth();
-	void setBordersAndCons(float3* ver1, float3* ver2, float3* ver3);
+	void setBordersAndCons(float4* ver1, float4* ver2, float4* ver3);
 	void culling();
 	Buffer();
 	~Buffer();

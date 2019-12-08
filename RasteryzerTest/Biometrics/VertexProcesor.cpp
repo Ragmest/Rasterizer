@@ -4,8 +4,7 @@
 
 void VertexProcesor::setPerspective(float& fovy, float& aspect, float& near, float& far)
 {
-	fovy *= PI / 360;
-	float f = cos(fovy) / sin(fovy);
+	float f = cos(fovy * PI / 360) / sin(fovy * PI / 360);
 	view2proj = float4x4(	float4(f / aspect, 0, 0, 0),
 							float4(0, f, 0, 0),
 							float4(0, 0, (far + near) / (near - far), -1),
@@ -48,15 +47,43 @@ void VertexProcesor::multByRotation(float& a, float3& v)
 	float s = sin(a * PI / 180);
 	float c = cos(a * PI / 180);
 	v.normalize();
-	float4x4 m(	float4(v.x * v.x * (1 - c) + c,			v.y * v.x * (1 - c) - v.z * s,	v.x * v.z * (1 - c) + v.y * s,	0),
-				float4(v.y * v.x * (1 - c) + v.z * s,	v.y * v.y * (1 - c) + c,		v.y * v.z * (1 - c) - v.x * s,	0),
-				float4(v.x * v.z * (1 - c) - v.y * s,	v.y * v.z * (1 - c) + v.x * s,	v.z * v.z * (1 - c) + c,		0),
+	float4x4 m(	float4(v.x * v.x * (1 - c) + c,			v.y * v.x * (1 - c) + v.z * s,	v.x * v.z * (1 - c) - v.y * s,	0),
+				float4(v.y * v.x * (1 - c) - v.z * s,	v.y * v.y * (1 - c) + c,		v.y * v.z * (1 - c) + v.x * s,	0),
+				float4(v.x * v.z * (1 - c) + v.y * s,	v.y * v.z * (1 - c) - v.x * s,	v.z * v.z * (1 - c) + c,		0),
 				float4(0,								0,								0,								1));
 	obj2world = m * obj2world;
 }
 
+void VertexProcesor::clear()
+{
+	obj2world = float4x4(	float4(1, 0, 0, 0),
+							float4(0, 1, 0, 0),
+							float4(0, 0, 1, 0),
+							float4(0, 0, 0, 1));
+	world2view = float4x4(	float4(1, 0, 0, 0),
+							float4(0, 1, 0, 0),
+							float4(0, 0, 1, 0),
+							float4(0, 0, 0, 1));
+	view2proj = float4x4(	float4(1, 0, 0, 0),
+							float4(0, 1, 0, 0),
+							float4(0, 0, 1, 0),
+							float4(0, 0, 0, 1));
+}
+
 VertexProcesor::VertexProcesor()
 {
+	obj2world = float4x4(	float4(1, 0, 0, 0),
+							float4(0, 1, 0, 0),
+							float4(0, 0, 1, 0),
+							float4(0, 0, 0, 1));
+	world2view = float4x4(	float4(1, 0, 0, 0),
+							float4(0, 1, 0, 0),
+							float4(0, 0, 1, 0),
+							float4(0, 0, 0, 1));
+	view2proj = float4x4(	float4(1, 0, 0, 0),
+							float4(0, 1, 0, 0),
+							float4(0, 0, 1, 0),
+							float4(0, 0, 0, 1));
 }
 
 VertexProcesor::~VertexProcesor()
