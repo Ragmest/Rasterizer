@@ -149,12 +149,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="Rasterizer.cpp" />
     <ClCompile Include="VertexProcesor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjParser.h" />
     <ClInclude Include="Rasterizer.h" />
     <ClInclude Include="Structures.h" />
     <ClInclude Include="VertexProcesor.h" />

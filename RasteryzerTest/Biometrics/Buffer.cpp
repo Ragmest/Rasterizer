@@ -10,9 +10,9 @@ void Buffer::setSize(int h, int w)
 	this->pixels = new unsigned int * [w];
 	for (int i = 0; i < w; i++)
 		this->pixels[i] = new unsigned int[h];
-	this->depth = new unsigned int* [w];
+	this->depth = new  float* [w];
 	for (int i = 0; i < w; i++)
-		this->depth[i] = new unsigned int[h];
+		this->depth[i] = new float[h];
 }
 
 void Buffer::clearColor()
@@ -40,10 +40,10 @@ void Buffer::clearDepth()
 {
 	for (int i = 0; i < w; i++)
 		for (int j = 0; j < h; j++)
-			depth[i][j] = DEPTH;
+			depth[i][j] = std::numeric_limits<float>::max();
 }
 
-void Buffer::setBordersAndCons(float4* ver1, float4* ver2, float4* ver3)
+void Buffer::setBordersAndCons(float3* ver1, float3* ver2, float3* ver3)
 {
 	minx = std::min(std::min(ver1->x, ver2->x), ver3->x);
 	miny = std::min(std::min(ver1->y, ver2->y), ver3->y);

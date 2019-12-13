@@ -3,21 +3,27 @@
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include "VertexProcesor.h"
+#include "Object.h"
+#include "DirectionalLight.h"
 
 class Rasterizer
 {
 private: 
 	Buffer buffer;
 	std::vector<float4> vertices;
-	std::vector<float4> orginalVertices;
+	std::vector<float4> verticesMinus;
+	std::vector<float4> normals;
 	std::vector<int> triangleIndexes;
-	void triangulate(float4* ver1W, float4* ver2W, float4* ver3W);
+	std::vector<int> objectIndexes;
+	DirectionalLight* light;
+	void triangulate(float3* ver1W, float3* ver2W, float3* ver3W, float3* col1, float3* col2, float3* col3);
 	void applayMatrices();
+	void setUpVerticlesOfObjects();
 public:
-	VertexProcesor vertProc;
+	std::vector<Object> objects;
 	void rasterize();
 	void getImage(cv::Mat* image);
 
-	Rasterizer();
+	Rasterizer(std::vector<Object>* objects, DirectionalLight* light);
 };
 

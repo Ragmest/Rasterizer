@@ -1,28 +1,125 @@
 #include "Rasterizer.h"
 
-float4 InWindow(float4* ver)
+float3 InWindow(float4* ver)
 {
-	return float4((ver->x + 1) * WIDTH * 0.5f, (ver->y + 1) * HEIGHT * 0.5f, ver->z); //+ 1) * DEPTH * 0.5f);
+	return float3((ver->x + 1) * WIDTH * 0.5f, (ver->y + 1) * HEIGHT * 0.5f, ver->z); //+ 1) * DEPTH * 0.5f);
 }
 
 void Rasterizer::rasterize()
 {
-	buffer.clearColor(100, 100, 100);
+	buffer.clearColor(0, 0, 0);
 	buffer.clearDepth();
 	applayMatrices();
 	int size = triangleIndexes.size();
 	for (int i = 0; i < size; i += 3)
 	{
-		float4 tmp3 = vertices.at(triangleIndexes.at(i));
-		float4 tmp2 = vertices.at(triangleIndexes.at(i + 1));
-		float4 tmp1 = vertices.at(triangleIndexes.at(i + 2));
+		float3 ver3W = InWindow(&vertices.at(triangleIndexes.at(i)));
+		float3 ver2W = InWindow(&vertices.at(triangleIndexes.at(i + 1)));
+		float3 ver1W = InWindow(&vertices.at(triangleIndexes.at(i + 2)));
+		float3 v3 = float3(verticesMinus.at(triangleIndexes.at(i)).x, verticesMinus.at(triangleIndexes.at(i)).y, verticesMinus.at(triangleIndexes.at(i)).z);
+		float3 v2 = float3(verticesMinus.at(triangleIndexes.at(i + 1)).x, verticesMinus.at(triangleIndexes.at(i + 1)).y, verticesMinus.at(triangleIndexes.at(i + 1)).z);
+		float3 v1 = float3(verticesMinus.at(triangleIndexes.at(i + 2)).x, verticesMinus.at(triangleIndexes.at(i + 2)).y, verticesMinus.at(triangleIndexes.at(i + 2)).z);
+		//float3 v1 = -ver1W;
+		//float3 v2 = -ver2W;
+		//float3 v3 = -ver3W;
+		//float3 v1 = InWindow(&verticesMinus.at(triangleIndexes.at(i)));
+		//float3 v2 = InWindow(&verticesMinus.at(triangleIndexes.at(i + 1)));
+		//float3 v3 = InWindow(&verticesMinus.at(triangleIndexes.at(i + 2)));
+		//float3 v3 = -float3(vertices.at(triangleIndexes.at(i)).x, vertices.at(triangleIndexes.at(i)).y, vertices.at(triangleIndexes.at(i)).z);
+		//float3 v2 = -float3(vertices.at(triangleIndexes.at(i + 1)).x, vertices.at(triangleIndexes.at(i + 1)).y, vertices.at(triangleIndexes.at(i + 1)).z);
+		//float3 v1 = -float3(vertices.at(triangleIndexes.at(i + 2)).x, vertices.at(triangleIndexes.at(i + 2)).y, vertices.at(triangleIndexes.at(i + 2)).z);
+		float3 n3 = float3(normals.at(triangleIndexes.at(i)).x, normals.at(triangleIndexes.at(i)).y, normals.at(triangleIndexes.at(i)).z);
+		float3 n2 = float3(normals.at(triangleIndexes.at(i + 1)).x, normals.at(triangleIndexes.at(i + 1)).y, normals.at(triangleIndexes.at(i + 1)).z);
+		float3 n1 = float3(normals.at(triangleIndexes.at(i + 2)).x, normals.at(triangleIndexes.at(i + 2)).y, normals.at(triangleIndexes.at(i + 2)).z);
+		//float3 n3 = InWindow(&normals.at(triangleIndexes.at(i)));
+		//float3 n2 = InWindow(&normals.at(triangleIndexes.at(i + 1)));
+		//float3 n1 = InWindow(&normals.at(triangleIndexes.at(i + 2)));
 
-		float4 ver3W = InWindow(&vertices.at(triangleIndexes.at(i)));
-		float4 ver2W = InWindow(&vertices.at(triangleIndexes.at(i + 1)));
-		float4 ver1W = InWindow(&vertices.at(triangleIndexes.at(i + 2)));
+		n3.normalize();
+		n2.normalize();
+		n1.normalize();
+
+		//float3 R1 = light.position.reflection(n1);
+		//float3 R2 = light.position.reflection(n2);
+		//float3 R3 = light.position.reflection(n3);
+
+		float3 posLight = float3(light->position.x,light->position.y,light->position.z);
+
+		float3 R1 = posLight.reflection(n1);
+		float3 R2 = posLight.reflection(n2);
+		float3 R3 = posLight.reflection(n3);
+		float diffuse1 = light->position.dot(n1);
+		float diffuse2 = light->position.dot(n2);
+		float diffuse3 = light->position.dot(n3);
+		//float tmp1 = R1.dot(v1);
+		//float tmp2 = R2.dot(v2);
+		//float tmp3 = R3.dot(v3);
+		float tmp1 = v1.dot(R1);
+		float tmp2 = v2.dot(R2);
+		float tmp3 = v3.dot(R3);
+		if (tmp1 < 0)
+			tmp1 = 0;
+		if (tmp2 < 0)
+			tmp2 = 0;
+		if (tmp3 < 0)
+			tmp3 = 0;
+		float specular1 = pow(tmp1, light->shininess);
+		float specular2 = pow(tmp2, light->shininess);
+		float specular3 = pow(tmp3, light->shininess);
+		//float specular1 = powf(light->shininess, tmp1);
+		//float specular2 = powf(light->shininess, tmp2);
+		//float specular3 = powf(light->shininess, tmp3);
+		//float3 col1 = float3(0.5f, 0.5f, 0.5f);
+		//float3 col2 = float3(0.5f, 0.5f, 0.5f);
+		//float3 col3 = float3(0.5f, 0.5f, 0.5f);
+		float3 col1; //= float3(0.5f, 0.0f, 0.0f);
+		float3 col2; //= float3(0.0f, 0.5f, 0.0f);
+		float3 col3; //= float3(0.0f, 0.0f, 0.5f);
+		//if (diffuse1 > 1)
+		//	diffuse1 = 1;
+		//if (diffuse2 > 1)
+		//	diffuse2 = 1;
+		//if (diffuse3 > 1)
+		//	diffuse3 = 1;
+		//if (diffuse1 < 0)
+		//	diffuse1 = 0;
+		//if (diffuse2 < 0)
+		//	diffuse2 = 0;
+		//if (diffuse3 < 0)
+		//	diffuse3 = 0;
+		if (specular1 > 1)
+			specular1 = 1;
+		if (specular2 > 1)
+			specular2 = 1;
+		if (specular3 > 1)
+			specular3 = 1;
+		if (specular1 < 0)
+			specular1 = 0;
+		if (specular2 < 0)
+			specular2 = 0;
+		if (specular3 < 0)
+			specular3 = 0;
+		//col1 = light.ambient + light.diffuse * diffuse1 + light.specular * specular1;
+		//col2 = light.ambient + light.diffuse * diffuse2 + light.specular * specular2;
+		//col3 = light.ambient + light.diffuse * diffuse3 + light.specular * specular3;
+		//col1 = light.diffuse * diffuse1 + light.specular * specular1;
+		//col2 = light.diffuse * diffuse2 + light.specular * specular2;
+		//col3 = light.diffuse * diffuse3 + light.specular * specular3;
+		//col1 = light.ambient + light.diffuse * diffuse1;
+		//col2 = light.ambient + light.diffuse * diffuse2;
+		//col3 = light.ambient + light.diffuse * diffuse3;
+		col1 = light->specular * specular1;
+		col2 = light->specular * specular2;
+		col3 = light->specular * specular3;
+		//col1 = light->diffuse * diffuse1;
+		//col2 = light->diffuse * diffuse2;
+		//col3 = light->diffuse * diffuse3;
+		col1.ZeroOne();
+		col2.ZeroOne();
+		col3.ZeroOne();
 		buffer.setBordersAndCons(&ver3W, &ver2W, &ver1W);
 		buffer.culling();
-		triangulate(&ver3W, &ver2W, &ver1W);
+		triangulate(&ver3W, &ver2W, &ver1W, &col3, &col2, &col1);
 	}
 }
 
@@ -45,36 +142,47 @@ void Rasterizer::getImage(cv::Mat* image)
 	}
 }
 
-void Rasterizer::triangulate(float4* ver1W, float4* ver2W, float4* ver3W)
+Rasterizer::Rasterizer(std::vector<Object>* objects, DirectionalLight* light)
 {
-	unsigned char r1(255), r2(0), r3(0);
-	unsigned char g1(0), g2(255), g3(0);
-	unsigned char b1(0), b2(0), b3(255);
-	for (int y = buffer.miny; y < buffer.maxy; y++)
+	buffer.setSize(HEIGHT, WIDTH);
+
+	this->objects = *objects;
+	this->light = light;
+	setUpVerticlesOfObjects();
+}
+
+void Rasterizer::triangulate(float3* ver1W, float3* ver2W, float3* ver3W, float3* col1, float3* col2, float3* col3)
+{
+	for (int y = buffer.miny; y <= buffer.maxy; y++)
 	{
-		for (int x = buffer.minx; x < buffer.maxx; x++)
+		for (int x = buffer.minx; x <= buffer.maxx; x++)
 		{
 			//if (((ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x)) > 0 &&
 			//	((ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x)) > 0 &&
 			//	((ver3W->x - ver1W->x) * (y - ver3W->y) - (ver3W->y - ver1W->y) * (x - ver3W->x)) > 0)
-			if ((((ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x) > 0) ||
-				((buffer.tl1 && (((ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x)) >= 0)))) &&
-				(((ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x) > 0) ||
-				((buffer.tl2 && (((ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x)) >= 0)))) &&
-					(((ver3W->x - ver1W->x) * (y - ver3W->y) - (ver3W->y - ver1W->y) * (x - ver3W->x) > 0) ||
-				((buffer.tl3 && (((ver3W->x - ver1W->x) * (y - ver3W->y) - (ver3W->y - ver1W->y) * (x - ver3W->x)) >= 0)))))
+			if (((					(ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x) > 0) ||
+				((buffer.tl1 && ((	(ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x)) >= 0)))) &&
+				((					(ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x) > 0) ||
+				((buffer.tl2 && ((	(ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x)) >= 0)))) &&
+				((					(ver3W->x - ver1W->x) * (y - ver3W->y) - (ver3W->y - ver1W->y) * (x - ver3W->x) > 0) ||
+				((buffer.tl3 && ((	(ver3W->x - ver1W->x) * (y - ver3W->y) - (ver3W->y - ver1W->y) * (x - ver3W->x)) >= 0)))))
 			{
-				float lamb1 = (buffer.dy23 * (x - ver3W->x) + (ver3W->x - ver2W->x) * (y - ver3W->y)) / (buffer.dy23 * (ver1W->x - ver3W->x) + (ver3W->x - ver2W->x) * (ver1W->y - ver3W->y));
-				float lamb2 = ((buffer.dy31 * (x - ver3W->x) + (ver1W->x - ver3W->x) * (y - ver3W->y)) / (buffer.dy31 * buffer.dx23 + (ver1W->x - ver3W->x) * buffer.dy23));
-				float lamb3 = 1 - lamb1 - lamb2;
-				unsigned char r = (r1 * lamb1 + r2 * lamb2 + r3 * lamb3);
-				unsigned char g = (g1 * lamb1 + g2 * lamb2 + g3 * lamb3);
-				unsigned char b = (b1 * lamb1 + b2 * lamb2 + b3 * lamb3);
-				float depth = lamb1 * ver1W->z + lamb2 * ver2W->z + lamb3 * ver3W->z;
-				if (depth < buffer.depth[x][y])
+				//if ((ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x) < 10.0f ||
+				//	(ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x) < 10.0f ||
+				//	(ver3W->x - ver1W->x) * (y - ver3W->y) - (ver3W->y - ver1W->y) * (x - ver3W->x) < 10.0f)
 				{
-					buffer.pixels[x][y] = b | g << 8 | r << 16;
-					buffer.depth[x][y] = depth;
+					float lamb1 = ((buffer.dy23 * (x - ver3W->x)) + (ver3W->x - ver2W->x) * (y - ver3W->y)) / ((buffer.dy23 * (ver1W->x - ver3W->x)) + (ver3W->x - ver2W->x) * (ver1W->y - ver3W->y));
+					float lamb2 = ((buffer.dy31 * (x - ver3W->x)) + (ver1W->x - ver3W->x) * (y - ver3W->y)) / ((buffer.dy31 * buffer.dx23) + ((ver1W->x - ver3W->x) * buffer.dy23));
+					float lamb3 = 1 - lamb1 - lamb2;
+					unsigned char r = 255 * (col1->x * lamb1 + col2->x * lamb2 + col3->x * lamb3);
+					unsigned char g = 255 * (col1->y * lamb1 + col2->y * lamb2 + col3->y * lamb3);
+					unsigned char b = 255 * (col1->z * lamb1 + col2->z * lamb2 + col3->z * lamb3);
+					float depth = lamb1 * ver1W->z + lamb2 * ver2W->z + lamb3 * ver3W->z;
+					if (depth < buffer.depth[x][y])
+					{
+						buffer.pixels[x][y] = b | g << 8 | r << 16;
+						buffer.depth[x][y] = depth;
+					}
 				}
 			}
 		}
@@ -83,84 +191,135 @@ void Rasterizer::triangulate(float4* ver1W, float4* ver2W, float4* ver3W)
 
 void Rasterizer::applayMatrices()
 {
-	int size = vertices.size();
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < objectIndexes.size(); ++i)
 	{
-		vertices.at(i) = orginalVertices.at(i);
-		vertices.at(i) = vertProc.obj2world * vertices.at(i);
-		vertices.at(i) = vertProc.world2view * vertices.at(i);
-		vertices.at(i) = vertProc.view2proj * vertices.at(i);
-		float w = vertices.at(i).w;
-		vertices.at(i) = float4(vertices.at(i).x / w, vertices.at(i).y / w, vertices.at(i).z / w, w);
+		int start = objectIndexes.at(i);
+		int end;
+		if (i + 1 < objectIndexes.size())
+			end = objectIndexes.at(i + 1);
+		else
+			end = vertices.size();
+		for (int j = start; j < end; j++)
+		{
+			vertices.at(j) = objects.at(i).orginalVertices.at(j - start);
+			vertices.at(j) = objects.at(i).verProc.obj2world * vertices.at(j);
+			vertices.at(j) = objects.at(i).verProc.world2view * vertices.at(j);
+			vertices.at(j) = objects.at(i).verProc.view2proj * vertices.at(j);
+			float w = vertices.at(j).w;
+			vertices.at(j) = float4(vertices.at(j).x / w, vertices.at(j).y / w, vertices.at(j).z / w, w);
+
+			normals.at(j) = objects.at(i).normals.at(j - start);
+			normals.at(j) = objects.at(i).verProc.obj2world * normals.at(j);
+			normals.at(j) = objects.at(i).verProc.world2view * normals.at(j);
+			normals.at(j) = objects.at(i).verProc.view2proj * normals.at(j);
+			w = normals.at(j).w;
+			normals.at(j) = float4(normals.at(j).x / w, normals.at(j).y / w, normals.at(j).z / w, w);
+
+			verticesMinus.at(j) = -objects.at(i).orginalVertices.at(j - start); 
+			verticesMinus.at(j) = objects.at(i).verProc.obj2world * verticesMinus.at(j);
+			verticesMinus.at(j) = objects.at(i).verProc.world2view * verticesMinus.at(j);
+			verticesMinus.at(j) = objects.at(i).verProc.view2proj * verticesMinus.at(j);
+			w = verticesMinus.at(j).w;
+			verticesMinus.at(j) = float4(verticesMinus.at(j).x / w, verticesMinus.at(j).y / w, verticesMinus.at(j).z / w, w);
+		}
+		//light->position = float3(1, 1, 1);
+		//light->position = objects.at(0).verProc.obj2world * light->position;
+		//light->position = objects.at(0).verProc.world2view * light->position;
+		//light->position = objects.at(0).verProc.view2proj * light->position;
+		//float w = light->position.w;
+		//light->position = float4(light->position.x / w, light->position.y / w, light->position.z / w, w);
 	}
 }
 
-Rasterizer::Rasterizer()
+void Rasterizer::setUpVerticlesOfObjects()
 {
-	buffer.setSize(HEIGHT, WIDTH);
-	buffer.clearColor(100, 100, 100);
-	buffer.clearDepth();
-
-	//vertices.push_back(float4(0.86f, 1.1f, 0.3f));
-	//vertices.push_back(float4(0.0f, 1.6f, 2.3f));
-	//vertices.push_back(float4(-0.86f, 1.1f, 0.3f));
-	//vertices.push_back(float4(0.0f, 2.6f, 0.3f));
-
-	//triangleIndexes.push_back(2);
-	//triangleIndexes.push_back(1);
-	//triangleIndexes.push_back(0);
-
-	//triangleIndexes.push_back(1);
-	//triangleIndexes.push_back(3);
-	//triangleIndexes.push_back(0);
-
-	//triangleIndexes.push_back(1);
-	//triangleIndexes.push_back(2);
-	//triangleIndexes.push_back(3);
-
-	//triangleIndexes.push_back(0);
-	//triangleIndexes.push_back(3);
-	//triangleIndexes.push_back(2);
-
-	vertices.push_back(float4());
-	vertices.push_back(float4());
-	vertices.push_back(float4());
-	vertices.push_back(float4());
-	orginalVertices.push_back(float4(0.86f, -0.5f, 0.0f));
-	orginalVertices.push_back(float4(-0.86f, -0.5f, 0.0f));
-	orginalVertices.push_back(float4(0.0f, 0.0f, 1.0f));
-	orginalVertices.push_back(float4(0.0f, 1.0f, 0.0f));
-
-	triangleIndexes.push_back(2);
-	triangleIndexes.push_back(1);
-	triangleIndexes.push_back(0);
-
-	triangleIndexes.push_back(1);
-	triangleIndexes.push_back(3);
-	triangleIndexes.push_back(0);
-
-	triangleIndexes.push_back(1);
-	triangleIndexes.push_back(2);
-	triangleIndexes.push_back(3);
-
-	triangleIndexes.push_back(0);
-	triangleIndexes.push_back(3);
-	triangleIndexes.push_back(2);
-
-	//vertices.push_back(float3(-0.5f, -0.5f, 0.8f));
-	//vertices.push_back(float3(-0.5f, 0.5f, 0.8f));
-	//vertices.push_back(float3(0.4f, 0.0f, 0.0f));
-	//vertices.push_back(float3(-0.5f, -0.5f, 0.3f));
-	//vertices.push_back(float3(-0.5f, 0.5f, 0.3f));
-	//vertices.push_back(float3(0.5f, 0.5f, 0.3f));
-	//triangleIndexes.push_back(0);
-	//triangleIndexes.push_back(1);
-	//triangleIndexes.push_back(2);
-
-	//vertices.push_back(float3(-0.5f, -0.5f, 0.3f));
-	//vertices.push_back(float3(0.5f, -0.5f, 0.3f));
-	//vertices.push_back(float3(0.5f, 0.5f, 0.3f));
-	//triangleIndexes.push_back(5);
-	//triangleIndexes.push_back(4);
-	//triangleIndexes.push_back(3);
+	for (int i = 0; i < objects.size(); i++)
+	{
+		Object* obj = &objects.at(i);
+		int offset = vertices.size();
+		objectIndexes.push_back(offset);
+		for (int j = 0; j < obj->orginalVertices.size(); j++)
+		{
+			vertices.push_back(float4(obj->orginalVertices.at(j)));
+			verticesMinus.push_back(-float4(obj->orginalVertices.at(j)));
+		}
+		for (int j = 0; j < obj->normals.size(); j++)
+		{
+			normals.push_back(float4(obj->normals.at(j)));
+		}
+		for (int j = 0; j < obj->triangleIndexes.size(); j++)
+		{
+			triangleIndexes.push_back(obj->triangleIndexes.at(j) + offset);
+		}
+	}
 }
+
+//Rasterizer::Rasterizer()
+//{
+//	buffer.setSize(HEIGHT, WIDTH);
+//	buffer.clearColor(100, 100, 100);
+//	buffer.clearDepth();
+//
+//	//vertices.push_back(float4(0.86f, 1.1f, 0.3f));
+//	//vertices.push_back(float4(0.0f, 1.6f, 2.3f));
+//	//vertices.push_back(float4(-0.86f, 1.1f, 0.3f));
+//	//vertices.push_back(float4(0.0f, 2.6f, 0.3f));
+//
+//	//triangleIndexes.push_back(2);
+//	//triangleIndexes.push_back(1);
+//	//triangleIndexes.push_back(0);
+//
+//	//triangleIndexes.push_back(1);
+//	//triangleIndexes.push_back(3);
+//	//triangleIndexes.push_back(0);
+//
+//	//triangleIndexes.push_back(1);
+//	//triangleIndexes.push_back(2);
+//	//triangleIndexes.push_back(3);
+//
+//	//triangleIndexes.push_back(0);
+//	//triangleIndexes.push_back(3);
+//	//triangleIndexes.push_back(2);
+//
+//	vertices.push_back(float4());
+//	vertices.push_back(float4());
+//	vertices.push_back(float4());
+//	vertices.push_back(float4());
+//	orginalVertices.push_back(float4(0.86f, -0.5f, 0.0f));
+//	orginalVertices.push_back(float4(-0.86f, -0.5f, 0.0f));
+//	orginalVertices.push_back(float4(0.0f, 0.0f, 1.0f));
+//	orginalVertices.push_back(float4(0.0f, 1.0f, 0.0f));
+//
+//	triangleIndexes.push_back(2);
+//	triangleIndexes.push_back(1);
+//	triangleIndexes.push_back(0);
+//
+//	triangleIndexes.push_back(1);
+//	triangleIndexes.push_back(3);
+//	triangleIndexes.push_back(0);
+//
+//	triangleIndexes.push_back(1);
+//	triangleIndexes.push_back(2);
+//	triangleIndexes.push_back(3);
+//
+//	triangleIndexes.push_back(0);
+//	triangleIndexes.push_back(3);
+//	triangleIndexes.push_back(2);
+//
+//	//vertices.push_back(float3(-0.5f, -0.5f, 0.8f));
+//	//vertices.push_back(float3(-0.5f, 0.5f, 0.8f));
+//	//vertices.push_back(float3(0.4f, 0.0f, 0.0f));
+//	//vertices.push_back(float3(-0.5f, -0.5f, 0.3f));
+//	//vertices.push_back(float3(-0.5f, 0.5f, 0.3f));
+//	//vertices.push_back(float3(0.5f, 0.5f, 0.3f));
+//	//triangleIndexes.push_back(0);
+//	//triangleIndexes.push_back(1);
+//	//triangleIndexes.push_back(2);
+//
+//	//vertices.push_back(float3(-0.5f, -0.5f, 0.3f));
+//	//vertices.push_back(float3(0.5f, -0.5f, 0.3f));
+//	//vertices.push_back(float3(0.5f, 0.5f, 0.3f));
+//	//triangleIndexes.push_back(5);
+//	//triangleIndexes.push_back(4);
+//	//triangleIndexes.push_back(3);
+//}

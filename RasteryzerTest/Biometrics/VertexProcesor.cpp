@@ -4,11 +4,12 @@
 
 void VertexProcesor::setPerspective(float& fovy, float& aspect, float& near, float& far)
 {
-	float f = cos(fovy * PI / 360) / sin(fovy * PI / 360);
+	float tmp = fovy * (PI / 360.0f);
+	float f = cos(tmp) / sin(tmp);
 	view2proj = float4x4(	float4(f / aspect, 0, 0, 0),
 							float4(0, f, 0, 0),
 							float4(0, 0, (far + near) / (near - far), -1),
-							float4(0, 0, 2 * far * near / (near - far), 0));
+							float4(0, 0, (2 * far * near) / (near - far), 0));
 }
 
 void VertexProcesor::setLookat(float3& eye, float3& center, float3 up)
@@ -54,6 +55,12 @@ void VertexProcesor::multByRotation(float& a, float3& v)
 	obj2world = m * obj2world;
 }
 
+void VertexProcesor::calculateWVP()
+{
+	//WVP = (obj2world.combine(world2view).combine(view2proj));
+	WVP = obj2world * world2view * view2proj;
+}
+
 void VertexProcesor::clear()
 {
 	obj2world = float4x4(	float4(1, 0, 0, 0),
@@ -68,6 +75,10 @@ void VertexProcesor::clear()
 							float4(0, 1, 0, 0),
 							float4(0, 0, 1, 0),
 							float4(0, 0, 0, 1));
+	WVP = float4x4(			float4(1, 1, 1, 1),
+							float4(1, 1, 1, 1),
+							float4(1, 1, 1, 1),
+							float4(1, 1, 1, 1));
 }
 
 VertexProcesor::VertexProcesor()
@@ -84,6 +95,10 @@ VertexProcesor::VertexProcesor()
 							float4(0, 1, 0, 0),
 							float4(0, 0, 1, 0),
 							float4(0, 0, 0, 1));
+	WVP = float4x4(			float4(1, 1, 1, 1),
+							float4(1, 1, 1, 1),
+							float4(1, 1, 1, 1),
+							float4(1, 1, 1, 1));
 }
 
 VertexProcesor::~VertexProcesor()
