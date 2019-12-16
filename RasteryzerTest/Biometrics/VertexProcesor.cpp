@@ -1,6 +1,4 @@
 #include "VertexProcesor.h"
-//#include "Structures.h"
-
 
 void VertexProcesor::setPerspective(float& fovy, float& aspect, float& near, float& far)
 {
@@ -53,6 +51,7 @@ void VertexProcesor::multByRotation(float& a, float3& v)
 				float4(v.x * v.z * (1 - c) + v.y * s,	v.y * v.z * (1 - c) - v.x * s,	v.z * v.z * (1 - c) + c,		0),
 				float4(0,								0,								0,								1));
 	obj2world = m * obj2world;
+	obj2worldRotation = m * obj2worldRotation;
 }
 
 void VertexProcesor::calculateWVP()
@@ -63,42 +62,29 @@ void VertexProcesor::calculateWVP()
 
 void VertexProcesor::clear()
 {
-	obj2world = float4x4(	float4(1, 0, 0, 0),
-							float4(0, 1, 0, 0),
-							float4(0, 0, 1, 0),
-							float4(0, 0, 0, 1));
-	world2view = float4x4(	float4(1, 0, 0, 0),
-							float4(0, 1, 0, 0),
-							float4(0, 0, 1, 0),
-							float4(0, 0, 0, 1));
-	view2proj = float4x4(	float4(1, 0, 0, 0),
-							float4(0, 1, 0, 0),
-							float4(0, 0, 1, 0),
-							float4(0, 0, 0, 1));
-	WVP = float4x4(			float4(1, 1, 1, 1),
-							float4(1, 1, 1, 1),
-							float4(1, 1, 1, 1),
-							float4(1, 1, 1, 1));
+	obj2world = obj2worldRotation = world2view = view2proj = 
+	float4x4(	float4(1, 0, 0, 0),
+				float4(0, 1, 0, 0),
+				float4(0, 0, 1, 0),
+				float4(0, 0, 0, 1));
+
+	WVP = float4x4(	float4(1, 1, 1, 1),
+					float4(1, 1, 1, 1),
+					float4(1, 1, 1, 1),
+					float4(1, 1, 1, 1));
 }
 
 VertexProcesor::VertexProcesor()
 {
-	obj2world = float4x4(	float4(1, 0, 0, 0),
-							float4(0, 1, 0, 0),
-							float4(0, 0, 1, 0),
-							float4(0, 0, 0, 1));
-	world2view = float4x4(	float4(1, 0, 0, 0),
-							float4(0, 1, 0, 0),
-							float4(0, 0, 1, 0),
-							float4(0, 0, 0, 1));
-	view2proj = float4x4(	float4(1, 0, 0, 0),
-							float4(0, 1, 0, 0),
-							float4(0, 0, 1, 0),
-							float4(0, 0, 0, 1));
-	WVP = float4x4(			float4(1, 1, 1, 1),
-							float4(1, 1, 1, 1),
-							float4(1, 1, 1, 1),
-							float4(1, 1, 1, 1));
+	obj2world = obj2worldRotation = world2view = view2proj =
+	float4x4(	float4(1, 0, 0, 0),
+				float4(0, 1, 0, 0),
+				float4(0, 0, 1, 0),
+				float4(0, 0, 0, 1));
+	WVP = float4x4(	float4(1, 1, 1, 1),
+					float4(1, 1, 1, 1),
+					float4(1, 1, 1, 1),
+					float4(1, 1, 1, 1));
 }
 
 VertexProcesor::~VertexProcesor()

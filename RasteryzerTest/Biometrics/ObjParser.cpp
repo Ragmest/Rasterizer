@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include "Structures.h"
+#include "float3.h"
 
 void ObjParser::readMeshFromFile(const std::string& filename, Object* object)
 {

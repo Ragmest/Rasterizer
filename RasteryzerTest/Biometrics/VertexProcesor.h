@@ -1,9 +1,10 @@
 #pragma once
-#include "Structures.h"
+#include "float4x4.h"
 class VertexProcesor
 {
 public:
 	float4x4 obj2world;
+	float4x4 obj2worldRotation;
 	float4x4 world2view;
 	float4x4 view2proj;
 	float4x4 WVP;

@@ -1,5 +1,5 @@
 #pragma once
-#include "Structures.h"
+#include "float4.h"
 class DirectionalLight
 {
 public:

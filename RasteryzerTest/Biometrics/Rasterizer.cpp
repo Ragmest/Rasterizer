@@ -15,96 +15,90 @@ void Rasterizer::rasterize()
 	buffer.clearColor(0, 0, 0);
 	buffer.clearDepth();
 	applayMatrices();
-	int size = triangleIndexes.size();
-	for (int i = 0; i < size; i += 3)
+	for (int j = 0; j < objectIndexes.size(); ++j)
 	{
-		float3 ver3W = InWindow(&vertices.at(triangleIndexes.at(i)));
-		float3 ver2W = InWindow(&vertices.at(triangleIndexes.at(i + 1)));
-		float3 ver1W = InWindow(&vertices.at(triangleIndexes.at(i + 2)));
-		float3 v3 = -float3(vertices.at(triangleIndexes.at(i)).x, vertices.at(triangleIndexes.at(i)).y, vertices.at(triangleIndexes.at(i)).z);
-		float3 v2 = -float3(vertices.at(triangleIndexes.at(i + 1)).x, vertices.at(triangleIndexes.at(i + 1)).y, vertices.at(triangleIndexes.at(i + 1)).z);
-		float3 v1 = -float3(vertices.at(triangleIndexes.at(i + 2)).x, vertices.at(triangleIndexes.at(i + 2)).y, vertices.at(triangleIndexes.at(i + 2)).z);
-		//float3 v3 = float3(verticesMinus.at(triangleIndexes.at(i)).x, verticesMinus.at(triangleIndexes.at(i)).y, verticesMinus.at(triangleIndexes.at(i)).z);
-		//float3 v2 = float3(verticesMinus.at(triangleIndexes.at(i + 1)).x, verticesMinus.at(triangleIndexes.at(i + 1)).y, verticesMinus.at(triangleIndexes.at(i + 1)).z);
-		//float3 v1 = float3(verticesMinus.at(triangleIndexes.at(i + 2)).x, verticesMinus.at(triangleIndexes.at(i + 2)).y, verticesMinus.at(triangleIndexes.at(i + 2)).z);
-		v3.normalize();
-		v2.normalize();
-		v1.normalize();
-		float3 n3 = float3(normals.at(triangleIndexes.at(i)).x, normals.at(triangleIndexes.at(i)).y, normals.at(triangleIndexes.at(i)).z);
-		float3 n2 = float3(normals.at(triangleIndexes.at(i + 1)).x, normals.at(triangleIndexes.at(i + 1)).y, normals.at(triangleIndexes.at(i + 1)).z);
-		float3 n1 = float3(normals.at(triangleIndexes.at(i + 2)).x, normals.at(triangleIndexes.at(i + 2)).y, normals.at(triangleIndexes.at(i + 2)).z);
-		n3.normalize();
-		n2.normalize();
-		n1.normalize();
+		int start; 
+		if (j == 0)
+		{
+			start = 0;
+		} 
+		else
+		{
+			start = objects.at(j - 1).triangleIndexes.size();
+		}
+		int end = start + objects.at(j).triangleIndexes.size();
+		for (int i = start; i < end; i += 3)
+		{
+			float3 pos3 = vertices.at(triangleIndexes.at(i));
+			float3 pos2 = vertices.at(triangleIndexes.at(i + 1));
+			float3 pos1 = vertices.at(triangleIndexes.at(i + 2));
 
-		float3 posLight = float3(light->position.x, light->position.y, light->position.z);
-		posLight.normalize();
+			float3 n3 = normals.at(triangleIndexes.at(i));
+			float3 n2 = normals.at(triangleIndexes.at(i + 1));
+			float3 n1 = normals.at(triangleIndexes.at(i + 2));
 
-		float3 R1 = n1.reflection(posLight);
-		float3 R2 = n2.reflection(posLight);
-		float3 R3 = n3.reflection(posLight);
-		//float3 R1 = posLight - (n1 * n1.dot(posLight) * 2.0f);
-		//float3 R2 = posLight - (n2 * n2.dot(posLight) * 2.0f);
-		//float3 R3 = posLight - (n3 * n3.dot(posLight) * 2.0f);
-		//float3 R1 = posLight.reflection(n1);
-		//float3 R2 = posLight.reflection(n2);
-		//float3 R3 = posLight.reflection(n3);
-		float diffuse1 = posLight.dot(n1);
-		float diffuse2 = posLight.dot(n2);
-		float diffuse3 = posLight.dot(n3);
-		float tmp1 = R1.dot(v1);
-		float tmp2 = R2.dot(v2);
-		float tmp3 = R3.dot(v3);
-		if (tmp1 < 0)
-			tmp1 = 0;
-		if (tmp2 < 0)
-			tmp2 = 0;
-		if (tmp3 < 0)
-			tmp3 = 0;
-		float specular1 = 0;
-		float specular2 = 0;
-		float specular3 = 0;
+			float3 viewDir3 = (*eye - pos3).normalizeProd();
+			float3 viewDir2 = (*eye - pos2).normalizeProd();
+			float3 viewDir1 = (*eye - pos1).normalizeProd();
 
-		specular1 = pow(tmp1, light->shininess);
-		specular2 = pow(tmp2, light->shininess);
-		specular3 = pow(tmp3, light->shininess);
-		float3 col1; //= float3(0.5f, 0.0f, 0.0f);
-		float3 col2; //= float3(0.0f, 0.5f, 0.0f);
-		float3 col3; //= float3(0.0f, 0.0f, 0.5f);
-		if (specular1 > 1)
-			specular1 = 1;
-		if (specular2 > 1)
-			specular2 = 1;
-		if (specular3 > 1)
-			specular3 = 1;
-		if (specular1 < 0)
-			specular1 = 0;
-		if (specular2 < 0)
-			specular2 = 0;
-		if (specular3 < 0)
-			specular3 = 0;
-		col1 = light->ambient + light->diffuse * diffuse1 + light->specular * specular1;
-		col2 = light->ambient + light->diffuse * diffuse2 + light->specular * specular2;
-		col3 = light->ambient + light->diffuse * diffuse3 + light->specular * specular3;
-		//col1 = light->diffuse * diffuse1 + light->specular * specular1;
-		//col2 = light->diffuse * diffuse2 + light->specular * specular2;
-		//col3 = light->diffuse * diffuse3 + light->specular * specular3;
-		//col1 = light->ambient + light->diffuse * diffuse1;
-		//col2 = light->ambient + light->diffuse * diffuse2;
-		//col3 = light->ambient + light->diffuse * diffuse3;
-		//col1 = light->specular * specular1;
-		//col2 = light->specular * specular2;
-		//col3 = light->specular * specular3;
-		//col1 = light->diffuse * diffuse1;
-		//col2 = light->diffuse * diffuse2;
-		//col3 = light->diffuse * diffuse3;
-		col1.ZeroOne();
-		col2.ZeroOne();
-		col3.ZeroOne();
+			float3 lightVector3 = (float3(light->position) - pos3).normalizeProd();
+			float3 lightVector2 = (float3(light->position) - pos2).normalizeProd();
+			float3 lightVector1 = (float3(light->position) - pos1).normalizeProd();
 
-		buffer.setBordersAndCons(&ver3W, &ver2W, &ver1W);
-		buffer.culling();
-		triangulate(&ver3W, &ver2W, &ver1W, &col3, &col2, &col1);
+			float diffuse3 = fmax(0.0f, n3.dot(lightVector3));
+			float diffuse2 = fmax(0.0f, n2.dot(lightVector2));
+			float diffuse1 = fmax(0.0f, n1.dot(lightVector1));
+
+			float3 angleW3 = (viewDir3 + lightVector3).normalizeProd();
+			float3 angleW2 = (viewDir2 + lightVector2).normalizeProd();
+			float3 angleW1 = (viewDir1 + lightVector1).normalizeProd();
+
+			float specular3 = fmax(0.0f, n3.dot(angleW3));
+			float specular2 = fmax(0.0f, n2.dot(angleW2));
+			float specular1 = fmax(0.0f, n1.dot(angleW1));
+
+			specular3 = pow(specular3, fmax(1.0f, light->shininess)); //* 2.0f;
+			specular2 = pow(specular2, fmax(1.0f, light->shininess)); //* 2.0f;
+			specular1 = pow(specular1, fmax(1.0f, light->shininess)); //* 2.0f;
+
+			float3 col3 = light->ambient + light->diffuse * diffuse3 + light->specular * specular3;
+			float3 col2 = light->ambient + light->diffuse * diffuse2 + light->specular * specular2;
+			float3 col1 = light->ambient + light->diffuse * diffuse1 + light->specular * specular1;
+			col3 = *objects.at(j).col * col3;
+			col2 = *objects.at(j).col * col2;
+			col1 = *objects.at(j).col * col1;
+			col3.ZeroOne();
+			col2.ZeroOne();
+			col1.ZeroOne();
+
+			float4 posInCam3 = vertices.at(triangleIndexes.at(i));
+			float4 posInCam2 = vertices.at(triangleIndexes.at(i + 1));
+			float4 posInCam1 = vertices.at(triangleIndexes.at(i + 2));
+
+			posInCam3 = objects.at(j).verProc.world2view * posInCam3;
+			posInCam2 = objects.at(j).verProc.world2view * posInCam2;
+			posInCam1 = objects.at(j).verProc.world2view * posInCam1;
+
+			posInCam3 = objects.at(j).verProc.view2proj * posInCam3;
+			posInCam2 = objects.at(j).verProc.view2proj * posInCam2;
+			posInCam1 = objects.at(j).verProc.view2proj * posInCam1;
+
+			float w3 = posInCam3.w;
+			float w2 = posInCam2.w;
+			float w1 = posInCam1.w;
+
+			posInCam3 = float4(posInCam3.x / w3, posInCam3.y / w3, posInCam3.z / w3, w3);
+			posInCam2 = float4(posInCam2.x / w2, posInCam2.y / w2, posInCam2.z / w2, w2);
+			posInCam1 = float4(posInCam1.x / w1, posInCam1.y / w1, posInCam1.z / w1, w1);			
+
+			float3 ver3W = InWindow(&posInCam3);
+			float3 ver2W = InWindow(&posInCam2);
+			float3 ver1W = InWindow(&posInCam1);
+
+			buffer.setBordersAndCons(&ver3W, &ver2W, &ver1W);
+			buffer.culling();
+			triangulate(&ver3W, &ver2W, &ver1W, &col3, &col2, &col1);
+		}
 	}
 }
 
@@ -127,12 +121,13 @@ void Rasterizer::getImage(cv::Mat* image)
 	}
 }
 
-Rasterizer::Rasterizer(std::vector<Object>* objects, DirectionalLight* light)
+Rasterizer::Rasterizer(std::vector<Object>* objects, DirectionalLight* light, float3* eye)
 {
 	buffer.setSize(HEIGHT, WIDTH);
 
 	this->objects = *objects;
 	this->light = light;
+	this->eye = eye;
 	setUpVerticlesOfObjects();
 }
 
@@ -142,9 +137,6 @@ void Rasterizer::triangulate(float3* ver1W, float3* ver2W, float3* ver3W, float3
 	{
 		for (int x = buffer.minx; x <= buffer.maxx; x++)
 		{
-			//if (((ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x)) > 0 &&
-			//	((ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x)) > 0 &&
-			//	((ver3W->x - ver1W->x) * (y - ver3W->y) - (ver3W->y - ver1W->y) * (x - ver3W->x)) > 0)
 			if (((					(ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x) > 0) ||
 				((buffer.tl1 && ((	(ver1W->x - ver2W->x) * (y - ver1W->y) - (ver1W->y - ver2W->y) * (x - ver1W->x)) >= 0)))) &&
 				((					(ver2W->x - ver3W->x) * (y - ver2W->y) - (ver2W->y - ver3W->y) * (x - ver2W->x) > 0) ||
@@ -184,35 +176,21 @@ void Rasterizer::applayMatrices()
 			end = objectIndexes.at(i + 1);
 		else
 			end = vertices.size();
-		for (int j = start; j < end; j++)
+		for (int j = start; j < end; ++j)
 		{
 			vertices.at(j) = objects.at(i).orginalVertices.at(j - start);
 			vertices.at(j) = objects.at(i).verProc.obj2world * vertices.at(j);
-			vertices.at(j) = objects.at(i).verProc.world2view * vertices.at(j);
-			vertices.at(j) = objects.at(i).verProc.view2proj * vertices.at(j);
+			//vertices.at(j) = objects.at(i).verProc.world2view * vertices.at(j);
+			//vertices.at(j) = objects.at(i).verProc.view2proj * vertices.at(j);
 			float w = vertices.at(j).w;
-			vertices.at(j) = float4(vertices.at(j).x / w, vertices.at(j).y / w, vertices.at(j).z / w, w);
+			vertices.at(j) = float4(vertices.at(j).x / w, vertices.at(j).y / w, vertices.at(j).z / w, 1);
 
 			normals.at(j) = objects.at(i).normals.at(j - start);
-			normals.at(j) = objects.at(i).verProc.obj2world * normals.at(j);
-			normals.at(j) = objects.at(i).verProc.world2view * normals.at(j);
-			normals.at(j) = objects.at(i).verProc.view2proj * normals.at(j);
-			w = normals.at(j).w;
-			normals.at(j) = float4(normals.at(j).x / w, normals.at(j).y / w, normals.at(j).z / w, w);
-
-			verticesMinus.at(j) = -(objects.at(i).orginalVertices.at(j - start)); 
-			verticesMinus.at(j) = objects.at(i).verProc.obj2world * verticesMinus.at(j);
-			verticesMinus.at(j) = objects.at(i).verProc.world2view * verticesMinus.at(j);
-			verticesMinus.at(j) = objects.at(i).verProc.view2proj * verticesMinus.at(j);
-			w = verticesMinus.at(j).w;
-			verticesMinus.at(j) = float4(verticesMinus.at(j).x / w, verticesMinus.at(j).y / w, verticesMinus.at(j).z / w, w);
+			normals.at(j) = objects.at(i).verProc.obj2worldRotation * normals.at(j);
+			//normals.at(j).normalize();
+			//w = normals.at(j).w;
+			//normals.at(j) = float4(normals.at(j).x / w, normals.at(j).y / w, normals.at(j).z / w, w);
 		}
-		light->position = float3(0, 1, 1);
-		//light->position = objects.at(0).verProc.obj2world * light->position;
-		light->position = objects.at(0).verProc.world2view * light->position;
-		light->position = objects.at(0).verProc.view2proj * light->position;
-		float w = light->position.w;
-		light->position = float4(light->position.x / w, light->position.y / w, light->position.z / w, w);
 	}
 }
 
@@ -226,7 +204,6 @@ void Rasterizer::setUpVerticlesOfObjects()
 		for (int j = 0; j < obj->orginalVertices.size(); j++)
 		{
 			vertices.push_back(float4(obj->orginalVertices.at(j)));
-			verticesMinus.push_back(-float4(obj->orginalVertices.at(j)));
 		}
 		for (int j = 0; j < obj->normals.size(); j++)
 		{
@@ -238,73 +215,3 @@ void Rasterizer::setUpVerticlesOfObjects()
 		}
 	}
 }
-
-//Rasterizer::Rasterizer()
-//{
-//	buffer.setSize(HEIGHT, WIDTH);
-//	buffer.clearColor(100, 100, 100);
-//	buffer.clearDepth();
-//
-//	//vertices.push_back(float4(0.86f, 1.1f, 0.3f));
-//	//vertices.push_back(float4(0.0f, 1.6f, 2.3f));
-//	//vertices.push_back(float4(-0.86f, 1.1f, 0.3f));
-//	//vertices.push_back(float4(0.0f, 2.6f, 0.3f));
-//
-//	//triangleIndexes.push_back(2);
-//	//triangleIndexes.push_back(1);
-//	//triangleIndexes.push_back(0);
-//
-//	//triangleIndexes.push_back(1);
-//	//triangleIndexes.push_back(3);
-//	//triangleIndexes.push_back(0);
-//
-//	//triangleIndexes.push_back(1);
-//	//triangleIndexes.push_back(2);
-//	//triangleIndexes.push_back(3);
-//
-//	//triangleIndexes.push_back(0);
-//	//triangleIndexes.push_back(3);
-//	//triangleIndexes.push_back(2);
-//
-//	vertices.push_back(float4());
-//	vertices.push_back(float4());
-//	vertices.push_back(float4());
-//	vertices.push_back(float4());
-//	orginalVertices.push_back(float4(0.86f, -0.5f, 0.0f));
-//	orginalVertices.push_back(float4(-0.86f, -0.5f, 0.0f));
-//	orginalVertices.push_back(float4(0.0f, 0.0f, 1.0f));
-//	orginalVertices.push_back(float4(0.0f, 1.0f, 0.0f));
-//
-//	triangleIndexes.push_back(2);
-//	triangleIndexes.push_back(1);
-//	triangleIndexes.push_back(0);
-//
-//	triangleIndexes.push_back(1);
-//	triangleIndexes.push_back(3);
-//	triangleIndexes.push_back(0);
-//
-//	triangleIndexes.push_back(1);
-//	triangleIndexes.push_back(2);
-//	triangleIndexes.push_back(3);
-//
-//	triangleIndexes.push_back(0);
-//	triangleIndexes.push_back(3);
-//	triangleIndexes.push_back(2);
-//
-//	//vertices.push_back(float3(-0.5f, -0.5f, 0.8f));
-//	//vertices.push_back(float3(-0.5f, 0.5f, 0.8f));
-//	//vertices.push_back(float3(0.4f, 0.0f, 0.0f));
-//	//vertices.push_back(float3(-0.5f, -0.5f, 0.3f));
-//	//vertices.push_back(float3(-0.5f, 0.5f, 0.3f));
-//	//vertices.push_back(float3(0.5f, 0.5f, 0.3f));
-//	//triangleIndexes.push_back(0);
-//	//triangleIndexes.push_back(1);
-//	//triangleIndexes.push_back(2);
-//
-//	//vertices.push_back(float3(-0.5f, -0.5f, 0.3f));
-//	//vertices.push_back(float3(0.5f, -0.5f, 0.3f));
-//	//vertices.push_back(float3(0.5f, 0.5f, 0.3f));
-//	//triangleIndexes.push_back(5);
-//	//triangleIndexes.push_back(4);
-//	//triangleIndexes.push_back(3);
-//}

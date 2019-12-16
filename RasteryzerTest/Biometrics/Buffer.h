@@ -1,5 +1,5 @@
 #pragma once
-#include "Structures.h"
+#include "float3.h"
 class Buffer
 {
 public:

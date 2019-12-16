@@ -1,7 +1,8 @@
 #include "Object.h"
+#include "float3.h"
 
 void Object::calculateNormals()
-	{
+{
 	float3 n;
 	for (int i = 0; i < orginalVertices.size(); ++i)
 		normals.push_back(float3());
@@ -16,14 +17,15 @@ void Object::calculateNormals()
 
 	for (int i = 0; i < normals.size(); ++i)
 	{
-		normals.at(i) = orginalVertices.at(i);
+		//normals.at(i) = orginalVertices.at(i);
 		normals.at(i).normalize();
 	}
 
 }
 
-Object::Object()
+Object::Object(float3* col)
 {
+	this->col = col;
 	orginalVertices = std::vector<float3>();
 	normals = std::vector<float3>();
 	triangleIndexes = std::vector<int>();

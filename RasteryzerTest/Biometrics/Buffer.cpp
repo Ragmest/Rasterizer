@@ -1,7 +1,5 @@
 #include "Buffer.h"
-#include "Structures.h"
 #include <algorithm>
-
 
 void Buffer::setSize(int h, int w)
 {
@@ -75,6 +73,10 @@ void Buffer::culling()
 	miny = std::max(miny, 0);
 	maxx = std::min(maxx, w - 1);
 	maxy = std::min(maxy, h - 1);
+	//minx = 0;
+	//miny = 0;
+	//maxx = this->w;
+	//maxy = this->h;
 }
 
 Buffer::Buffer()
