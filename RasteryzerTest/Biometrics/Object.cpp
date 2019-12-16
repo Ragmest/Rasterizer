@@ -1,7 +1,7 @@
 #include "Object.h"
 
 void Object::calculateNormals()
-{
+	{
 	float3 n;
 	for (int i = 0; i < orginalVertices.size(); ++i)
 		normals.push_back(float3());
@@ -13,8 +13,13 @@ void Object::calculateNormals()
 		normals.at(triangleIndexes.at(i + 1)) = n + normals.at(triangleIndexes.at(i + 1));
 		normals.at(triangleIndexes.at(i + 2)) = n + normals.at(triangleIndexes.at(i + 2));
 	}
+
 	for (int i = 0; i < normals.size(); ++i)
+	{
+		normals.at(i) = orginalVertices.at(i);
 		normals.at(i).normalize();
+	}
+
 }
 
 Object::Object()

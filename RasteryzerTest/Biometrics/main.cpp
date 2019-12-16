@@ -11,6 +11,9 @@
 
 int main()
 {
+	float3 test1 = float3(0, 0, 1);
+	float3 test2 = float3(0, 0.5, 0);
+	float test3 = test1.dot(test2);
 	// Create black empty images
 	cv::Mat image = cv::Mat::zeros(HEIGHT - 1, WIDTH - 1, CV_8UC3);
 	std::string winName = "Image";
@@ -21,21 +24,22 @@ int main()
 	std::vector<Object> objVector;
 	objVector.push_back(obj);
 
-	DirectionalLight light = DirectionalLight(float3(1, 1, 1), float3(0.1, 0.1, 0.1), float3(0.5, 0.5, 0.5), float3(0.5, 0.5, 0.5), 0.00000001f);
+	DirectionalLight light = DirectionalLight(float3(0, 1, 0), float3(0.0, 0.0, 0.0), float3(0.5, 0.5, 0.5), float3(1.0, 1.0, 1.0), 40.0f);
 
 	Rasterizer rasterizer(&objVector, &light);
 
-	float3 move = float3(0.0f, 0.0f, 0.f);
+	float3 move = float3(0.0f, 0.8f, 4.0f);
 	float3 axis = float3(0.f, 0.f, 0.f);
 	float angle = 0.f;
 	float3 scale = float3(1.0f, 1.0f, 1.0f);
-	rasterizer.objects.at(0).verProc.multByTranslation(move);
 	rasterizer.objects.at(0).verProc.multByRotation(angle, axis);
+	rasterizer.objects.at(0).verProc.multByTranslation(move);
+
 	rasterizer.objects.at(0).verProc.multByScale(scale);
 	rasterizer.objects.at(0).verProc.obj2world.transposit();
 
-	float3 eye = float3(0.0f, 0.0f, -2.0f);
-	float3 center = eye + float3(0.0f, 0.0f, 1.0f);
+	float3 eye = float3(0.0f, 1.0f, 0.0f);
+	float3 center = eye + float3(0.0f, 0.0f, -1.0f);
 	float3 up = float3(0, 1, 0);
 	rasterizer.objects.at(0).verProc.setLookat(eye, center, up);
 	rasterizer.objects.at(0).verProc.world2view.transposit();
@@ -70,11 +74,11 @@ int main()
 
 		rasterizer.objects.at(0).verProc.clear();
 		//move = float3(0.0f, 0.8f, 2.f);
-		axis = float3(1.f, 1.f, 1.f);
+		axis = float3(0.f, 1.f, 0.f);
 		angle += 90.0f * dTime;
 		//scale = float3(1.f, 1.f, 1.f);
-		rasterizer.objects.at(0).verProc.multByTranslation(move);
 		rasterizer.objects.at(0).verProc.multByRotation(angle, axis);
+		rasterizer.objects.at(0).verProc.multByTranslation(move);
 		rasterizer.objects.at(0).verProc.multByScale(scale);
 		rasterizer.objects.at(0).verProc.obj2world.transposit();
 
@@ -103,7 +107,7 @@ int main()
 		imshow(winName, image);
 		//cv::imwrite("image"+std::to_string(iterator) + ".jpg", image);
 		//iterator++;
-		light.shininess += 0.1f;
+		//light.shininess += 0.1f;
 		cv::waitKey(1);
 	}
 

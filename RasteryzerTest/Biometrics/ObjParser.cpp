@@ -8,6 +8,7 @@ void ObjParser::readMeshFromFile(const std::string& filename, Object* object)
 {
 	std::ifstream input;
 	std::regex vertex("(v )([-]?\\d*\\.\\d*)\\s([-]?\\d*\\.\\d*)\\s([-]?\\d*\\.\\d*)");
+	std::regex normal("(vn )([-]?\\d*\\.\\d*)\\s([-]?\\d*\\.\\d*)\\s([-]?\\d*\\.\\d*)");
 	std::regex face("(f )(\\d*)\/{2}(\\d*)\\s(\\d*)\/{2}(\\d*)\\s(\\d*)\/{2}(\\d*)");
 	try
 	{
@@ -22,6 +23,11 @@ void ObjParser::readMeshFromFile(const std::string& filename, Object* object)
 					std::stof(result[2].str().c_str()),
 					std::stof(result[3].str().c_str()),
 					std::stof(result[4].str().c_str())));
+			//if (std::regex_search(line, result, normal))
+			//	object->normals.push_back(float3(
+			//		std::stof(result[2].str().c_str()),
+			//		std::stof(result[3].str().c_str()),
+			//		std::stof(result[4].str().c_str())));
 			if (std::regex_search(line, result, face))
 			{
 				//object->triangleIndexes.push_back((std::stoi(result[2]) - 1));

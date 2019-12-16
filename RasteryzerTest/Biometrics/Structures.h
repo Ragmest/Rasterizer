@@ -60,7 +60,7 @@ struct float3
 
 	float dot(const float3& other)
 	{
-		return x * other.x + y * other.y + z * other.z;
+		return (x * other.x) + (y * other.y) + (z * other.z);
 	}
 
 	float3 cross(const float3& other)
@@ -84,8 +84,9 @@ struct float3
 
 	float3 reflection(float3 normal)
 	{
-		return *this - (normal * ( 2 * this->dot(normal)));
+		//return *this - (normal * ( 2 * this->dot(normal)));
 		//return (normal * (2 * this->dot(normal))) - *this;
+		return *this - (normal * 2 * (this->dot(normal)/normal.dot(normal)));
 		//normal of course must be normalized
 	}
 
@@ -138,6 +139,7 @@ struct float4
 	float4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 	float4(float x, float y, float z) : x(x), y(y), z(z), w(1) {}
 	float4(float3 ver): x(ver.x), y(ver.y), z(ver.z), w(1) {}
+	float4(float3 ver, float w) : x(ver.x), y(ver.y), z(ver.z), w(w) {}
 
 	float dot(const float4& other)
 	{
